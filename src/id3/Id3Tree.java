@@ -29,7 +29,7 @@ public class Id3Tree {
     public void buildTree() {
         File file = new File("");
         String filePath = file.getAbsolutePath();
-        filePath = filePath + "\\test-file.txt"; // Real file: cse353-hw2-data.tsv
+        filePath = filePath + "\\test-file2.txt"; // Real file: cse353-hw2-data.tsv
         
         Id3DataManager dm = new Id3DataManager();
         dm.loadDataFile(filePath);
@@ -41,9 +41,10 @@ public class Id3Tree {
     private void createRoot() {
         root = new Id3Node();
         root.setNodeData(data);
-        boolean success = root.determineEntropy();
         
-        System.out.println(root.getEntropy());
+        
+        root.bestSplit();       
+        
     }
     
 
