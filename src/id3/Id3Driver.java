@@ -26,8 +26,7 @@ public class Id3Driver {
         
         dm = new Id3DataManager();
         dm.loadDataFile(filePath);
-        
-        
+           
         dm.processContinuousData(0, 1);
         dm.processContinuousData(12, 1);      
         dm.processContinuousData(10, 100);        
@@ -36,9 +35,17 @@ public class Id3Driver {
         dm.removeDataSet(2);
         dm.removeDataSet(4);
         
-        double accuracy = validationTest(5, 4);
-        System.out.println(accuracy);
+        int fold = 5;
+        double sum = 0;
         
+        for (int i = 1; i <= fold; i++) {
+            double accuracy = validationTest(fold, i);
+            sum += accuracy;
+        }
+        
+        sum /= 5;
+
+        System.out.println(sum);
     }
     
     public static double compareResults(ArrayList<String> results, ArrayList<ArrayList<String>> data) {
@@ -67,25 +74,18 @@ public class Id3Driver {
      * @return 
      */
     public static double validationTest(int split, int part) {
-        ArrayList<String> curArr = (ArrayList<String>) dm.getData().get(0);
-        int n = curArr.size();
+        int n = dm.getData().get(0).size();
         
         n /= split;
         part--;
         
-        dm.dataSplit(split);
-        
         int beg = n * part;
         
-        for (int i = 0; i <= n; i++) {
-            for (int j = 0; j < dm.getData().size(); j++) {
-                dm.getData().get(j).remove(beg);
-            }
-        }
+        ArrayList<ArrayList<String>> modifiedDataArr = dm.dataSplit(beg, n, part);
         
         Id3Tree id3Tree = new Id3Tree();
-        id3Tree.buildTree(dm.getData());
-        ArrayList<ArrayList<String>> splitData = dm.getDataSplit1();
+        id3Tree.buildTree(modifiedDataArr);
+        ArrayList<ArrayList<String>> splitData = dm.getDataSplit();
         ArrayList<String> results = id3Tree.testData(splitData);
         double accuracy = compareResults(results, splitData);
         
