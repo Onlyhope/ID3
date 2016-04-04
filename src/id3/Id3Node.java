@@ -13,143 +13,238 @@ import java.util.ArrayList;
  */
 public class Id3Node {
     
-    private ArrayList<ArrayList<String>> nodeData;
-    private ArrayList<Id3Node> children;
-    private double entropy;
-    private int posCount;
-    private int negCount;
     private String attribute;
     
+    private ArrayList<Id3Node> children;
+    private ArrayList<ArrayList<String>> nodeData;
+    private double entropy;
+    int posCount;
+    int negCount;
     
-    
+
     public Id3Node() {
         nodeData = new ArrayList();
         children = new ArrayList();
         entropy = -1;
     }
-    
+
+    public Id3Node(int dataSize) {
+        nodeData = new ArrayList();
+        children = new ArrayList();
+        entropy = -1;
+
+        ArrayList<String> newEmptyData;
+        // Intializine new node data
+        for (int i = 0; i < dataSize; i++) {
+            newEmptyData = new ArrayList<>();
+            nodeData.add(newEmptyData);
+        }
+
+    }
+
     // Class Methods
+    public void split(int target) {
+
+    }
+
+    public void bestSplit() {
+        int numAttributes = nodeData.size() - 1; // Subtract 1, Last row is results
+        if (entropy == -1) determineEntropy();
+//        System.out.println(entropy);
+        
+        if (entropy > 0 && numAttributes > 0) {
+            double bestGain = 1;
+            double curGain = 0;
+            int bestIndex = 0;
+            ArrayList<Id3Node> bestSplitChildren = new ArrayList<>();
+
+            // Finding best split
+            for (int i = 0; i < numAttributes; i++) {
+                children.clear();
+                curGain = getGainOfAttribute(nodeData.get(i));
+
+                if (curGain < bestGain) {
+                    bestGain = curGain;
+                    bestIndex = i;
+                    bestSplitChildren.clear();
+                    bestSplitChildren.addAll(children);
+                }
+
+            }
+            children.clear();
+            children.addAll(bestSplitChildren);
+            cleanChildrenData(bestIndex);
+            for (Id3Node child : children) {
+                child.bestSplit();
+            }
+        } else if (entropy == 0) {
+//            System.out.println("Pure set found!");
+            Id3Node answerNode = new Id3Node();
+            int lastIndex = nodeData.size() - 1;
+            answerNode.setAttribute(nodeData.get(lastIndex).get(0));
+            children.add(answerNode);
+            return;
+        } else {
+//            System.out.println("No more classfiers or entropy not above 0");
+            return;
+        }
+    }
+
+    private double getGainOfAttribute(ArrayList<String> curAttribute) {
+
+        String curData;
+
+        for (int i = 0; i < curAttribute.size(); i++) {
+            curData = curAttribute.get(i);
+
+            // Find children with correct attribute name
+            createChildren(children, curData, i);
+        }
+
+        for (Id3Node curChildren : children) {
+            curChildren.determineEntropy();
+        }
+
+        return calcInfoGain(children);
+    }
+
+    private boolean createChildren(ArrayList<Id3Node> childrenNodes, String target, int curIndex) {
+        for (Id3Node node : childrenNodes) {
+            if (node.getAttribute().equals(target)) {
+                // Then get data from at mData's index from parent nodeData
+                for (int k = 0; k < nodeData.size(); k++) {
+                    node.getNodeData().get(k).add(nodeData.get(k).get(curIndex));
+                }
+                return true;
+            }
+        }
+        // Node was not found, create new node
+        Id3Node newNode = new Id3Node(getNodeData().size());
+        newNode.setAttribute(target);
+        children.add(newNode);
+
+        for (int k = 0; k < nodeData.size(); k++) {
+            newNode.getNodeData().get(k).add(nodeData.get(k).get(curIndex));
+        }
+
+        if (children.isEmpty()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
     
+    /**
+     * Calculates pseudo info gain.
+     * The lower it is the better.
+     *
+     * @param nodeList
+     * @return the weighted total entropy of children nodes
+     */
+    public double calcInfoGain(ArrayList<Id3Node> nodeList) {
+        double sum = 0;
+
+        for (Id3Node curNode : nodeList) {
+            sum = sum + curNode.getEntropy() * curNode.getNodeData().get(0).size();
+        }
+        sum /= getNodeData().get(0).size();
+
+        return sum;
+    }
     
+    private void cleanChildrenData(int indexToRemove) {
+        for (Id3Node node : children) {
+            node.getNodeData().remove(indexToRemove);
+        }
+    }
+
     public boolean determineEntropy() {
         boolean success = processData();
-        
+
         if (success) {
             entropy = calcEntropy(posCount, negCount);
             return true;
         } else {
             return false;
-        }     
+        }
     }
-    
+
     private boolean processData() {
         int lastIndex = nodeData.size() - 1;
-        
+
         for (String mData : nodeData.get(lastIndex)) {
-            if (mData.charAt(0) == '<') {
+            if (mData.equals("less")) {
                 negCount++;
-            } else if (mData.charAt(0) == '>') {
+            } else if (mData.equals("more")) {
                 posCount++;
             }
         }
-        
-        if (posCount == 0 && negCount == 0)
+
+        if (posCount == 0 && negCount == 0) {
             return false;
-        else
+        } else {
             return true;
-    }
-    
-    private boolean processData2() {
-        int lastIndex = nodeData.get(0).size() - 1;
-        
-        for(ArrayList<String> strArr : nodeData) {
-            if (strArr.get(lastIndex).charAt(0) == '<') {
-                negCount++;
-            } else if (strArr.get(lastIndex).charAt(0) == '>') {
-                posCount++;
-            }
         }
-        
-        if (posCount == 0 && negCount == 0)
-            return false;
-        else
-            return true;
     }
+
     /**
      * Calculates the entropy
+     *
      * @param positive
      * @param negative
-     * @return 
+     * @return
      */
-    public double calcEntropy(int positive, int negative) {      
+    public double calcEntropy(int positive, int negative) {
         int total = positive + negative;
         double p = (double) positive / total;
         double n = (double) negative / total;
-        
-        double log1, log2;
-        
+
+        double logP, logN;
+
         if (p > 0) {
-            log1 = Math.log(p) / Math.log(2);
+            logP = Math.log(p) / Math.log(2);
         } else {
-            log1 = 0;
+            logP = 0;
         }
         if (n > 0) {
-            log2 = Math.log(n) / Math.log(2);
+            logN = Math.log(n) / Math.log(2);
         } else {
-            log2 = 0;
+            logN = 0;
         }
-        
-        double result = -(p * log1) - (n * log2); 
-        
+
+        double result = -(p * logP) - (n * logN);
+
         return result;
     }
-    /**
-     * Calculates pseudo info gain.
-     * @param nodeList 
-     * @return 
-     */
-    private double calcInfoGain(ArrayList<Id3Node> nodeList) {
-       double sum = 0;
-       
-       for (Id3Node curNode : nodeList) {
-           sum = sum + curNode.getEntropy() * curNode.getNodeData().size();
-       }
-         
-       return sum;
-    }
-    
-    private void addNodeData(ArrayList<String> newData) {
-        nodeData.add(newData);        
-    }
-    
+
     // Getters
     public ArrayList<ArrayList<String>> getNodeData() {
         return nodeData;
     }
-    
+
     public ArrayList getChildren() {
         return children;
     }
-    
+
     public String getAttribute() {
         return attribute;
     }
-    
+
     public double getEntropy() {
         return entropy;
     }
-    
+
     // Setters
     public void setChildren(ArrayList<Id3Node> newChildren) {
         children = newChildren;
     }
+
     public void setNodeData(ArrayList<ArrayList<String>> newData) {
         nodeData = newData;
     }
-    
+
     public void setAttribute(String newAttribute) {
         attribute = newAttribute;
     }
-    
-    
+
 }
