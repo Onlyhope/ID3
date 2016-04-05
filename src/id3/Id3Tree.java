@@ -5,7 +5,6 @@
  */
 package id3;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -28,18 +27,41 @@ public class Id3Tree {
     }
 
     // Class Methods
+    
+    /**
+     * Begin building the tree. Set the data of tree to the data pass through.
+     * Then creates the new root and pass the newData to it.
+     * 
+     * @param newData 
+     */
     public void buildTree(ArrayList<ArrayList<String>> newData) {
         data = newData;
         createRoot(data);
     }
-
+    
+    /**
+     * Creates the root and set the nodeData to dataToUse. 
+     * Then split the root using a recursive Id3 Algorithm.
+     * 
+     * @param dataToUse 
+     */
     private void createRoot(ArrayList<ArrayList<String>> dataToUse) {
         root = new Id3Node();
         root.setNodeData(dataToUse);
 
         root.bestSplit();
     }
-
+    
+    /**
+     * Tests the data by turning each sample into a String.
+     * Test each sample using the private helper method testTree,
+     * which runs the sample down the decision tree.
+     * Saves the result in an array that is to be returned.
+     * 
+     * @param testData's row represent each sample and its columns
+     * represent an attribute of the sample.
+     * @return the array, testResults
+     */
     public ArrayList<String> testData(ArrayList<ArrayList<String>> testData) {
         if (root == null) {
             System.out.println("Tree not built");
@@ -47,7 +69,6 @@ public class Id3Tree {
         }
 
         ArrayList<String> testResults = new ArrayList();
-        int counter = 0;
 
         for (int i = 0; i < testData.size(); i++) {
             StringBuilder sb = new StringBuilder();
@@ -55,17 +76,21 @@ public class Id3Tree {
             for (String word : testData.get(i)) {
                 sb.append(word + "|");
             }
-
             testResults.add(testTree(sb.toString(), root));
-            counter++;
         }
 
-        System.out.println(counter);
-        System.out.println(testResults.size());
+//        System.out.println(counter);
+//        System.out.println(testResults.size());
 
         return testResults;
     }
-
+    
+    /**
+     * Runs the sample down the decision tree, at the start of curNode.
+     * @param sample to be tested.
+     * @param curNode is usually the root.
+     * @return results
+     */
     public String testTree(String sample, Id3Node curNode) {
         ArrayList<Id3Node> children = curNode.getChildren();
 
@@ -86,7 +111,6 @@ public class Id3Tree {
                     return "Undetermined";
                 }
             }
-
         }
 
         for (int i = 0; i < children.size(); i++) {
@@ -106,7 +130,10 @@ public class Id3Tree {
             return "Undetermined";
         }
     }
-
+    
+    /**
+     * Allows user controller traversal of tree. Used for debugging.
+     */
     public void traverseTree() {
         if (root == null) {
             System.out.println("Tree not built");
@@ -115,21 +142,12 @@ public class Id3Tree {
 
         traverseTree(root);
     }
-
-    public void postOrderTraversal(Id3Node curNode) {
-        if (curNode == null) {
-            return;
-        } else {
-
-            ArrayList<Id3Node> children = curNode.getChildren();
-
-            for (Id3Node child : children) {
-                postOrderTraversal(child);
-            }
-
-        }
-    }
-
+    
+    /**
+     * Helper method of traverseTree()
+     * 
+     * @param curNode 
+     */
     private void traverseTree(Id3Node curNode) {
         if (curNode.getChildren().isEmpty()) {
             System.out.println(curNode.getAttribute());

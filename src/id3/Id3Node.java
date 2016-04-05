@@ -12,15 +12,14 @@ import java.util.ArrayList;
  * @author Aaron
  */
 public class Id3Node {
-    
+
     private String attribute;
-    
+
     private ArrayList<Id3Node> children;
     private ArrayList<ArrayList<String>> nodeData;
     private double entropy;
     int posCount;
     int negCount;
-    
 
     public Id3Node() {
         nodeData = new ArrayList();
@@ -43,17 +42,23 @@ public class Id3Node {
     }
 
     // Class Methods
-    public void split(int target) {
-
-    }
-
+    
+    /**
+     * Uses the Id3 algorithm to split the nodes depending on the highest
+     * information gain or gain ratio.
+     */
     public void bestSplit() {
         int numAttributes = nodeData.size() - 1; // Subtract 1, Last row is results
-        if (entropy == -1) determineEntropy();
+        if (entropy == -1) {
+            determineEntropy();
+        }
 //        System.out.println(entropy);
-        
+
         if (entropy > 0 && numAttributes > 0) {
-            double bestGain = 1;
+            double infoGain = 0;
+            double splitEntropy = 0;
+            double gainRatio = 0;
+            double bestGain = 0;
             double curGain = 0;
             int bestIndex = 0;
             ArrayList<Id3Node> bestSplitChildren = new ArrayList<>();
@@ -62,12 +67,24 @@ public class Id3Node {
             for (int i = 0; i < numAttributes; i++) {
                 children.clear();
                 curGain = getGainOfAttribute(nodeData.get(i));
+                infoGain = entropy - curGain;
+                splitEntropy = calcSplitEntropy(children, i);
+                gainRatio = (infoGain / splitEntropy);
 
-                if (curGain < bestGain) {
-                    bestGain = curGain;
-                    bestIndex = i;
-                    bestSplitChildren.clear();
-                    bestSplitChildren.addAll(children);
+                if (children.size() > 2) {
+                    if (gainRatio > bestGain) {
+                        bestGain = gainRatio;
+                        bestIndex = i;
+                        bestSplitChildren.clear();
+                        bestSplitChildren.addAll(children);
+                    }
+                } else {
+                    if (infoGain > bestGain) {
+                        bestGain = infoGain;
+                        bestIndex = i;
+                        bestSplitChildren.clear();
+                        bestSplitChildren.addAll(children);
+                    }
                 }
 
             }
@@ -90,6 +107,17 @@ public class Id3Node {
         }
     }
 
+    /**
+     * Gets the pseudoInfoGain from splitting with the target attribute /
+     * classifier. Transfer current node data to the corresponding child node,
+     * by iterating over the targeted attribute data and matching it with the
+     * child node with same attribute. Uses the private helper method
+     * createChildren to accomplish this. Then pseudoInfoGain is calculated
+     * using the children nodes.
+     *
+     * @param curAttribute is the target attribute or classifier
+     * @return the pseudoInfoGain
+     */
     private double getGainOfAttribute(ArrayList<String> curAttribute) {
 
         String curData;
@@ -108,14 +136,24 @@ public class Id3Node {
         return calcInfoGain(children);
     }
 
-    private boolean createChildren(ArrayList<Id3Node> childrenNodes, String target, int curIndex) {
+    /**
+     * Data is transfered over to the correct child node. If no child nodes
+     * matches with target or current data, a new node is created and added on
+     * to childrenNodes. Data are also transferred.
+     *
+     * @param childrenNodes list of child nodes
+     * @param target is the current attribute value at the current index
+     * @param curIndex is the current index of the data being transferred
+     * @return
+     */
+    private void createChildren(ArrayList<Id3Node> childrenNodes, String target, int curIndex) {
         for (Id3Node node : childrenNodes) {
             if (node.getAttribute().equals(target)) {
                 // Then get data from at mData's index from parent nodeData
                 for (int k = 0; k < nodeData.size(); k++) {
                     node.getNodeData().get(k).add(nodeData.get(k).get(curIndex));
                 }
-                return true;
+                return;
             }
         }
         // Node was not found, create new node
@@ -128,17 +166,15 @@ public class Id3Node {
         }
 
         if (children.isEmpty()) {
-            return false;
-        } else {
-            return true;
+            System.out.println("No child node was created");
         }
     }
-    
+
     /**
-     * Calculates pseudo info gain.
-     * The lower it is the better.
+     * Calculates pseudo info gain, using the list of children. The lower it is
+     * the better.
      *
-     * @param nodeList
+     * @param nodeList is the children nodes
      * @return the weighted total entropy of children nodes
      */
     public double calcInfoGain(ArrayList<Id3Node> nodeList) {
@@ -151,24 +187,67 @@ public class Id3Node {
 
         return sum;
     }
-    
+
+    /**
+     * Calculates the splitInformation using the children nodes, which each has
+     * its own subset of values over the targeted attributed.
+     *
+     * @param childrenNodes to be used.
+     * @param index of targeted attribute
+     * @return splitInformation of attribute and the node that called the method
+     */
+    private double calcSplitEntropy(ArrayList<Id3Node> childrenNodes, int index) {
+        double splitEntropy = 0;
+
+        double setTotal = getNodeData().get(index).size();
+        double subsetRatio;
+        double log2Ratio;
+
+        for (Id3Node child : childrenNodes) {
+            subsetRatio = (child.getNodeData().get(0).size() / setTotal);
+            log2Ratio = Math.log(subsetRatio) / Math.log(2);
+            splitEntropy = splitEntropy - (subsetRatio * log2Ratio);
+        }
+
+        return splitEntropy;
+    }
+
+    /**
+     * Deletes the attribute's data once it is used.
+     *
+     * @param indexToRemove index of targeted attribute
+     */
     private void cleanChildrenData(int indexToRemove) {
         for (Id3Node node : children) {
             node.getNodeData().remove(indexToRemove);
         }
     }
 
-    public boolean determineEntropy() {
+    /**
+     * Processes data and sets posCount and negCount. Then it sets the entropy
+     * value to the calculated entropy value.
+     *
+     * @return
+     */
+    public void determineEntropy() {
         boolean success = processData();
 
         if (success) {
             entropy = calcEntropy(posCount, negCount);
-            return true;
+            return;
         } else {
-            return false;
+            System.out.println("Entropy is not set.");
         }
+
+        return;
     }
 
+    /**
+     * Counts the occurrences positive and negative in the data, using the
+     * targeted attribute.
+     *
+     * @return
+     */
     private boolean processData() {
         int lastIndex = nodeData.size() - 1;
 
@@ -188,7 +267,7 @@ public class Id3Node {
     }
 
     /**
-     * Calculates the entropy
+     * Calculates the entropy, using the node posCount and negCount.
      *
      * @param positive
      * @param negative
