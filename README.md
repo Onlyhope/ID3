@@ -59,6 +59,7 @@ end FUNCTION
 
  Process node's data to calculate posCount and negCount.
  Then use the above values to set the node's entropy value.
+
 determineEntropy(node):
 	
 	# Set posCount and negCount based on nodeData #
@@ -76,6 +77,7 @@ determineEntropy(node):
 end FUNCTION
 
 Calculates the pseudo InfoGain, the summation of the classifier's weighted entropy.
+
 calcInfoGain(children):
 
 	pseudoGain = 0	
@@ -90,6 +92,7 @@ calcInfoGain(children):
 end FUNCTION
 
 Calculates the splitInformation
+
 calcSplitEntropy(children):
 
 	splitEntropy = 0;
