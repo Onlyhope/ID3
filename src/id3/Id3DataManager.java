@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -93,13 +92,23 @@ public class Id3DataManager {
         }
     }
     
-    public ArrayList<ArrayList<String>> dataSplit(int beg, int split, int part) {
+    /**
+     * Makes a deep copy of the main data. Modify it by removing data
+     * values at the index beg. This is done n times and each time
+     * the value is copied over to dataSplit. dataSplit is arranged 
+     * differently and is used as training data.
+     * 
+     * @param beg index at where data are removed
+     * @param n times the data is removed and added
+     * @return the modified deep copy of the main data
+     */
+    public ArrayList<ArrayList<String>> dataSplit(int beg, int n) {
         ArrayList<ArrayList<String>> newDataArr = deepCopy(data);
         int dataSize = newDataArr.get(0).size();
         
         dataSplit = new ArrayList();
         
-        for (int i = 0; i < split; i++) {
+        for (int i = 0; i < n; i++) {
             ArrayList<String> temp = new ArrayList();
             for (int j = 0; j < newDataArr.size(); j++) {
                 temp.add(newDataArr.get(j).get(beg));
@@ -111,6 +120,12 @@ public class Id3DataManager {
         return newDataArr;
     }
     
+    /**
+     * Makes a deep copy of the main data.
+     * 
+     * @param arrayToCopy the data to be copied (main data)
+     * @return deepCopy
+     */
     private ArrayList<ArrayList<String>> deepCopy(ArrayList<ArrayList<String>> arrayToCopy) {
         ArrayList<ArrayList<String>> deepCopy = new ArrayList();
         
@@ -252,7 +267,7 @@ public class Id3DataManager {
 
     }
 
-    private static boolean compString(String left, String right) throws Exception {
+    private static boolean compString(String left, String right) {
         int a = Integer.parseInt(left);
         int b = Integer.parseInt(right);
 
@@ -280,29 +295,6 @@ public class Id3DataManager {
     // Getters
     public ArrayList<ArrayList<String>> getData() {
         return data;
-    }
-    
-    /**
-     * Creates a new ArrayList of all the data from
-     * index of beg to index of end. in the main Id3Array.
-     * @param beg
-     * @param end
-     * @return 
-     */
-    public ArrayList<ArrayList<String>> getDataRange(int beg, int end) {
-        ArrayList<ArrayList<String>> rangeData = new ArrayList();
-        
-        for (int i = 0; i < data.size(); i++) {
-            ArrayList<String> curArr = data.get(i);
-            List curList = curArr.subList(beg, end);
-            rangeData.add(new ArrayList());
-            
-            for (int k = 0; k < curList.size(); k++) {
-                rangeData.get(i).add((String) curList.get(k));
-            }
-        }
-        
-        return rangeData;
     }
     
     public ArrayList<ArrayList<String>> getDataSplit() {
