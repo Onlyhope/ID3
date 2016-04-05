@@ -10,7 +10,8 @@ class Id3Node {
 	String classifyingAttribute;
 }
 
-# Recursive method that will spilt node until no more classifiers or a pure set is found. #
+Recursive method that will spilt node until no more classifiers or a pure set is found.
+
 bestSplit(node):
 	
 	# Finds node entropy, posCount, and negCount #
@@ -56,8 +57,8 @@ bestSplit(node):
 	return
 end FUNCTION
 
-# Process node's data to calculate posCount and negCount. #
-# Then use the above values to set the node's entropy value. #
+ Process node's data to calculate posCount and negCount.
+ Then use the above values to set the node's entropy value.
 determineEntropy(node):
 	
 	# Set posCount and negCount based on nodeData #
@@ -74,7 +75,7 @@ determineEntropy(node):
 	return
 end FUNCTION
 
-# Calculates the pseudo InfoGain, the summation of the classifier's weighted entropy. #
+Calculates the pseudo InfoGain, the summation of the classifier's weighted entropy.
 calcInfoGain(children):
 
 	pseudoGain = 0	
@@ -88,7 +89,7 @@ calcInfoGain(children):
 	return pseudoGain
 end FUNCTION
 
-# Calculates the splitInformation
+Calculates the splitInformation
 calcSplitEntropy(children):
 
 	splitEntropy = 0;
