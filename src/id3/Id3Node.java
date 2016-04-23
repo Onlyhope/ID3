@@ -70,7 +70,12 @@ public class Id3Node {
                 infoGain = entropy - curGain;
                 splitEntropy = calcSplitEntropy(children, i);
                 gainRatio = (infoGain / splitEntropy);
-
+                
+                
+                /*
+                It is best at 2. Minimal difference between the use of infoGain and gainRatio
+                Percent changed (.1% - .5%)
+                */
                 if (children.size() > 2) {
                     if (gainRatio > bestGain) {
                         bestGain = gainRatio;

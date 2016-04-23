@@ -1,0 +1,14 @@
+Sunny	Hot	High	Weak	<
+Sunny	Hot	High	Strong	<
+Overcast	Hot	High	Weak	>
+Rain	Mild	High	Weak	>
+Rain	Cool	Normal	Weak	>
+Rain	Cool	Normal	Strong	>
+Overcast	Cool	Normal	Strong	>
+Sunny	Mild	High	Weak	<
+Sunny	Cool	Normal	Weak	>
+Rain	Mild	Normal	Weak	>
+Overcast	Mild	Normal	Weak	>
+Overcast	Hot	Normal	Weak	>
+Rain	Mild	High	Strong	<
+Sunny	Mild	High	Strong	>

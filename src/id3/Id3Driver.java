@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class Id3Driver {
     
-    private static Id3DataManager dm;
+    private static DataManager dm;
     
     public static void main(String[] args) {
         
@@ -23,7 +23,7 @@ public class Id3Driver {
         String filePath = file.getAbsolutePath();
         filePath = filePath + "\\cse353-hw2-data.tsv"; // Real file: cse353-hw2-data.tsv, test file: test-file.txt
         
-        dm = new Id3DataManager();
+        dm = new DataManager();
         dm.loadDataFile(filePath);
            
         dm.processContinuousData(0, 1); // Turns it into a binary attribute, using a threshold
