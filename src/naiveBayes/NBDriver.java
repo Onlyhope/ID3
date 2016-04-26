@@ -35,24 +35,23 @@ public class NBDriver {
         dm.removeDataSet(2); // Removes un-needed data fnlwgt
         dm.removeDataSet(4); // Removes continous version of education
         
-        NaiveBayesTables nbTable = new NaiveBayesTables(dm.getData());
-        
-        ArrayList<ArrayList<String>> positiveData = nbTable.getPosData();
-        ArrayList<ArrayList<String>> negativeData = nbTable.getNegData();
-
-        System.out.println(positiveData.get(0).size());
-        System.out.println(negativeData.get(0).size());
-        
-        HashMap positiveTable = nbTable.createProbabilityTable(positiveData);
-        
         double sum = 0;
         int fold = 5;
         
-        for (int i = 1; i <= fold; i++) {
-            ArrayList<ArrayList<String>> trainingData = splitData(fold, i);
+        int i = 1;
+               
+        for (int x = 1; x <= fold; x++) {           
+            ArrayList<ArrayList<String>> trainingData = splitData(fold, x);
             ArrayList<ArrayList<String>> testData = dm.getDataSplit();
             
-            double accuracy = 0;
+            NaiveBayesTables nbt = new NaiveBayesTables(trainingData);
+            nbt.createProbMaps();
+            
+            ArrayList<String> results = nbt.testData(testData);
+            ArrayList<String> actualResults = nbt.getActualResults();
+            
+            double accuracy = compareResults(results, actualResults);
+            System.out.println(accuracy);
             sum += accuracy;
         }
         sum /= 5;
@@ -60,16 +59,16 @@ public class NBDriver {
         System.out.println("Five cross validation accuracy: " + sum);
     }
     
-    public static double compareResults(ArrayList<String> results, ArrayList<ArrayList<String>> data) {
+    public static double compareResults(ArrayList<String> results, ArrayList<String> data) {
         double accuracy = 0;
         
         double posCount = 0;
         double counter = 0;
-        int index = data.get(0).size() - 1;
         
-        for (int i = 0; i < results.size() && i < data.size(); i++) {
-//            System.out.println(results.get(i) + "|" + data.get(i).get(index));
-            if (results.get(i).equals(data.get(i).get(index))) {
+        System.out.println("x123: " + results.size() + " " + data.size());
+        
+        for (int i = 0; i < results.size(); i++) {
+            if (results.get(i).equals(data.get(i))) {
                 posCount++;
             }
             counter++;
@@ -101,6 +100,22 @@ public class NBDriver {
             System.out.print(count++ + " ");
             for (int j = 0; j < dataToPrint.size(); j++) {
                 System.out.print(dataToPrint.get(j).get(i));
+            }
+            System.out.println();
+        }
+    }
+    
+    /**
+     * This is used to print test data.
+     * @param dataToPrint 
+     */
+    public static void printData2(ArrayList<ArrayList<String>> dataToPrint) {
+        int count = 1;
+        
+        for (int i = 0; i < dataToPrint.size(); i++) {
+            System.out.print(count++ + " ");
+            for (int j = 0; j < dataToPrint.get(0).size(); j++) {
+                System.out.print(dataToPrint.get(i).get(j) + " ");
             }
             System.out.println();
         }

@@ -62,6 +62,8 @@ public class Id3Driver {
         double counter = 0;
         int index = data.get(0).size() - 1;
         
+        System.out.println("x123: " + results.size() + " " + data.size());
+        
         for (int i = 0; i < results.size() && i < data.size(); i++) {
 //            System.out.println(results.get(i) + "|" + data.get(i).get(index));
             if (results.get(i).equals(data.get(i).get(index))) {

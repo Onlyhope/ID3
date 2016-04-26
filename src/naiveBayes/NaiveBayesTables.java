@@ -16,9 +16,15 @@ import java.util.Map;
  */
 public class NaiveBayesTables {
     
+    private ArrayList<String> actualResults;
+    
     private ArrayList<ArrayList<String>> fullData;
     private ArrayList<ArrayList<String>> posData;
     private ArrayList<ArrayList<String>> negData;
+    private HashMap<String, Double> negMap;
+    private HashMap<String, Double> posMap;
+    private Double negProb;
+    private Double posProb;
     
     /**'
      * Classify data into posData and negData;
@@ -28,6 +34,8 @@ public class NaiveBayesTables {
         fullData = data;
         posData = new ArrayList<>();
         negData = new ArrayList<>();
+        
+        actualResults = new ArrayList<>();
         
         int lastCol = fullData.size() - 1;
         
@@ -54,9 +62,18 @@ public class NaiveBayesTables {
                 // Leftover Conditions for debugging purposes
             }
         }
+        
+        double total = fullData.get(0).size();
+        negProb = negData.get(0).size() / total;
+        posProb = posData.get(0).size() / total;
     }
     
-    public HashMap createProbabilityTable(ArrayList<ArrayList<String>> data) {
+    public void createProbMaps() {
+        posMap = createProbabilityMap(posData);
+        negMap = createProbabilityMap(negData);
+    }
+    
+    public HashMap createProbabilityMap(ArrayList<ArrayList<String>> data) {
         HashMap<String, Double> probabilityMap = new HashMap<>();
         
         ArrayList<String> classifiers = data.get(data.size()-1);
@@ -77,12 +94,58 @@ public class NaiveBayesTables {
         }
         
         for (Map.Entry<String, Double> entry : probabilityMap.entrySet()) {
-            System.out.println(entry.getKey() + "|" + entry.getValue());
             entry.setValue(entry.getValue() / total);
-            System.out.println(entry.getKey() + "|" + entry.getValue());
         }
         
         return probabilityMap;
+    }
+    
+    public ArrayList<String> testData(ArrayList<ArrayList<String>> testData) {
+        
+        ArrayList<String> testResults = new ArrayList();
+        
+        for (int i = 0; i < testData.size(); i++) {
+            StringBuilder sb = new StringBuilder();
+            
+            actualResults.add(testData.get(i).get(testData.get(0).size()-1));
+
+            for (int j = 0; j < testData.get(0).size()-1; j++) {
+                sb.append(testData.get(i).get(j) + ",");
+            }
+           
+            testResults.add(testTable(sb.toString()));
+        }
+            
+        return testResults;
+    }
+    
+    private String testTable(String testData) {       
+        String[] testDataSplit = testData.split(",");
+        
+        double positiveP = posProb;
+        double negativeP = negProb;
+        
+        for (int i = 0; i < testDataSplit.length; i++) {
+            if (posMap.containsKey(testDataSplit[i])) {
+                positiveP *= posMap.get(testDataSplit[i]);
+            } else {
+                positiveP *= .000001;
+            }
+        }
+        
+        for (int i = 0; i < testDataSplit.length; i++) {
+            if (negMap.containsKey(testDataSplit[i])) {
+                negativeP *= negMap.get(testDataSplit[i]);
+            } else {
+                negativeP *= .000001;
+            }
+        }
+        
+        if (posProb > negProb) {
+            return "more";
+        } else {
+            return "less";
+        }
     }
     
     /**
@@ -108,6 +171,23 @@ public class NaiveBayesTables {
         return negData;
     }
     
+    public HashMap getNegMap() {
+        return negMap;
+    }
     
+    public HashMap getPosMap() {
+        return posMap;
+    }
     
+    public double getPosProb() {
+        return posProb;
+    }
+    
+    public double getNegProb() {
+        return negProb;
+    }
+    
+    public ArrayList<String> getActualResults() {
+        return actualResults;
+    }
 }
