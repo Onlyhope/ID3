@@ -1,0 +1,19 @@
+Data Processing:
+	
+	Missing values in dataset were handle by assigning a value of .000001. Instead of 0, this value
+	will prevent the total probablity from being 0.
+
+	Continuous values are classified into three categories. Less than, more than, or equal. They're determined by a threshold.
+	The threshold is determined by starting at 0 and increasing it until the best threshold is found. This will be the
+	treshold in which the data is organized.
+
+	The best threshold is currently determined by the highest infoGain using an ID3 algorithm, but will be changed later.
+
+Evaluation:
+
+	1. Accuracy: 0.7594065792302731
+	2. Accuracy: 0.7623091808213287
+	3. Accuracy: 0.7597290905181682
+	4. Accuracy: 0.7566114814018491
+	5. Accuracy: 0.7624166845839604
+	Five cross validation accuracy (average): 0.7600946033111159
