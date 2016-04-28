@@ -19,7 +19,7 @@ public class NBDriver {
     
     private static DataManager dm;
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         File file = new File("");
         String filePath = file.getAbsolutePath();
         filePath = filePath + "\\cse353-hw2-data.tsv"; // Real file: cse353-hw2-data.tsv, test file: test-file.txt
@@ -27,11 +27,6 @@ public class NBDriver {
         dm = new DataManager();
         dm.loadDataFile(filePath);
            
-        dm.processContinuousData(0, 1); // Turns it into a binary attribute, using a threshold
-        dm.processContinuousData(12, 1); // Turns it into a binary attribute, using a threshold     
-        dm.processContinuousData(10, 100); // Turns it into a binary attribute, using a threshold  
-        dm.processContinuousData(11, 100); // Turns it into a binary attribute, using a threshold
-        dm.processContinuousData(4, 1); // Turns it into a binary attribute, using a threshold
         dm.removeDataSet(2); // Removes un-needed data fnlwgt
         dm.removeDataSet(4); // Removes continous version of education
         
@@ -47,7 +42,7 @@ public class NBDriver {
             NaiveBayesTables nbt = new NaiveBayesTables(trainingData);
             nbt.createProbMaps();
             
-            ArrayList<String> results = nbt.testData(testData);
+            ArrayList<String> results = nbt.testData(testData, 0, 8, 9, 10);
             ArrayList<String> actualResults = nbt.getActualResults();
             
             double accuracy = compareResults(results, actualResults);
@@ -64,8 +59,6 @@ public class NBDriver {
         
         double posCount = 0;
         double counter = 0;
-        
-        System.out.println("x123: " + results.size() + " " + data.size());
         
         for (int i = 0; i < results.size(); i++) {
             if (results.get(i).equals(data.get(i))) {

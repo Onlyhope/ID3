@@ -3,11 +3,25 @@ Data Processing:
 	Missing values in dataset were handle by assigning a value of .000001. Instead of 0, this value
 	will prevent the total probablity from being 0.
 
-	Continuous values are classified into three categories. Less than, more than, or equal. They're determined by a threshold.
-	The threshold is determined by starting at 0 and increasing it until the best threshold is found. This will be the
-	treshold in which the data is organized.
+	Continuous values are treated with a probability density function. All continuous data are assumed to have
+	a continuous distribution. Average and Variance are calculate of each classifier and its respective attributes.
+	It is then plugged in to a function getContinuoutP, which outputs the probability of that value.
 
-	The best threshold is currently determined by the highest infoGain using an ID3 algorithm, but will be changed later.
+	getContinuousP is the probabilty density function.
+
+	public double getContinuousP(String value, double average, double variance) {
+        double x = Double.parseDouble(value);
+
+        double term1 = Math.sqrt(2 * Math.PI * variance);
+        term1 = 1 / term1;
+
+        double term2 = (x - average);
+        term2 = Math.pow(term2, 2);
+        term2 = (term2 / variance) * (-.5);
+        term2 = Math.exp(term2);
+
+        return term1 * term2;
+    }
 
 Evaluation:
 

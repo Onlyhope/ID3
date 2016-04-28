@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -20,6 +21,7 @@ public class DataManager {
 
     private ArrayList<ArrayList<String>> data;
     private ArrayList<ArrayList<String>> dataSplit;
+    private ArrayList<ArrayList<String>> conFullData;
     
     public DataManager() {
         data = new ArrayList<>();
@@ -138,6 +140,22 @@ public class DataManager {
         }
         
         return deepCopy;
+    }
+    
+    public void separateContinuous(ArrayList<ArrayList<String>> dataToSeparate, int... i) {
+        ArrayList<Integer> indices = new ArrayList<>();
+        for (int index : i) {
+            ArrayList<String> curConData = dataToSeparate.get(index);
+            conFullData.add(curConData);
+            indices.add(index);
+        }
+        
+        Collections.sort(indices, Collections.reverseOrder());
+        
+        for (int index : indices) {
+            dataToSeparate.remove(index);
+        }
+        
     }
     
     /**
